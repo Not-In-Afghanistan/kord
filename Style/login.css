@@ -78,3 +78,37 @@ body {
     background-color: rgb(180, 180, 180);
     transform: translateY(-2px);
 }
+.input {
+    background-color: rgb(43, 43, 43);
+    border: none;
+    color: white;
+    width: 30vw;
+    padding: 0.9rem 1.25rem;
+    height: auto;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    display: inline-block;
+}
+
+.btn2 {
+    background-color: rgb(247, 247, 247);
+    border: none;
+    color: black;
+    width: 32.8vw;
+    padding: 0.9rem 1.25rem;
+    height: auto;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: background-color 180ms ease, transform 150ms ease;
+    display: inline-block;
+}
+.btn2:hover {
+    /* slightly darker on hover */
+    background-color: rgb(180, 180, 180);
+    transform: translateY(-2px);
+}
