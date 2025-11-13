@@ -1,0 +1,264 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  display: flex;
+  height: 100vh;
+  background-color: #000000;
+  color: #fff;
+}
+
+/* Sidebar widths — fixed balance */
+#servers {
+  width: 15vw; /* bigger now */
+  background: #202020;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+#friends {
+  width: 15vw; /* smaller now */
+  background: #252525;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #2b2b2b;
+}
+
+/* Section headers */
+#servers h3,
+#friends h3 {
+  color: #b9bbbe;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+/* Buttons */
+#servers button {
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  border-radius: 3px;
+  background: #5865f2;
+  color: #fff;
+}
+/* Server icons */
+.server img,
+#server-list img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 5px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Server list */
+#server-list {
+  list-style: none;
+  margin-top: 5px;
+}
+
+#server-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px;
+  border-radius: 5px;
+  background: #2f3136;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  gap: 5px;
+}
+
+#server-list li:hover {
+  background: #36393f;
+}
+
+.server-info {
+  display: flex;
+  align-items: center;
+}
+
+.server-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-server-btn {
+  background: red;
+  border: none;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.delete-server-btn:hover {
+  background: #ff4d4d;
+}
+
+/* Friends list */
+#friend-list {
+  list-style: none;
+}
+
+#friend-list li {
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#friend-list li:hover {
+  background: #36393f;
+}
+
+/* Main chat */
+#messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+#messages p {
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+#messages p strong {
+  color: #fff;
+}
+
+#chat-form {
+  display: flex;
+  padding: 10px 20px;
+  background: #40444b;
+}
+
+#chat-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  background: #2f3136;
+  color: #fff;
+}
+
+#chat-input::placeholder {
+  color: #b9bbbe;
+}
+
+#chat-form button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background: #5865f2;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#chat-form button:hover {
+  background: #4752c4;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+  background: #2f3136;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content input {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+}
+
+.modal-content button {
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  background: #5865f2;
+  color: #fff;
+  cursor: pointer;
+}
+
+.modal-content button:hover {
+  background: #4752c4;
+}
+
+.close {
+  align-self: flex-end;
+  cursor: pointer;
+  color: #b9bbbe;
+  font-size: 18px;
+}
+
+.no-chat {
+  text-align: center;
+  color: gray;
+  margin-top: 40vh;
+  font-size: 18px;
+}
+.no-chat h2 {
+  color: white;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+#add-server-btn {
+  cursor: pointer;
+  background-color: #5865f2;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+#add-server-btn:disabled {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

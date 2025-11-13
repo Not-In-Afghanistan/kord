@@ -10,43 +10,60 @@ const firebaseConfig = {
   measurementId: "G-T5HK7JTWHW"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-document.getElementById("login").addEventListener("submit", function (e) {
+// === MANUAL ROLE LIST ===
+// Add usernames and their roles here
+const roles = {
+  "muzafar": "admin",
+  "helperkid": "helper"
+  // Add more like: "username": "role"
+};
+
+document.getElementById("login").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const error = document.getElementById("error");
-
-  // hide previous error
   error.style.display = "none";
 
-  // Check user in database
-  db.ref("users/" + username).get().then((snapshot) => {
-    if (snapshot.exists()) {
-      const userData = snapshot.val();
-      if (userData.password === password) {
-        // ✅ Login success
-        localStorage.setItem("currentUser", username);
-        localStorage.setItem("displayName", userData.displayName);
+  try {
+    const snapshot = await db.ref("users/" + username).get();
 
-        // Optional: slight delay to show feedback
-        setTimeout(() => {
-          window.location.href = "dash.html";
-        }, 300);
-      } else {
-        error.textContent = "Invalid username or password.";
-        error.style.display = "block";
-      }
-    } else {
+    if (!snapshot.exists()) {
       error.textContent = "Invalid username or password.";
       error.style.display = "block";
+      return;
     }
-  }).catch((err) => {
-    console.error(err);
-    error.textContent = "Error connecting to database. Try again.";
+
+    const userData = snapshot.val();
+
+    if (userData.password !== password) {
+      error.textContent = "Invalid username or password.";
+      error.style.display = "block";
+      return;
+    }
+
+    // === ROLE LOGIC ===
+    let userRole = "user"; // default role
+    if (roles[username]) {
+      userRole = roles[username];
+    }
+
+    // Store info locally
+    localStorage.setItem("currentUser", username);
+    localStorage.setItem("displayName", userData.displayName);
+    localStorage.setItem("role", userRole);  // NOW SAVING ROLE
+
+    console.log(`Logged in as ${username} with role: ${userRole}`);
+
+    window.location.href = "./dash.html";
+
+  } catch (err) {
+    console.error("Firebase login error:", err);
+    error.textContent = "Error connecting to database. Please try again.";
     error.style.display = "block";
-  });
+  }
 });
