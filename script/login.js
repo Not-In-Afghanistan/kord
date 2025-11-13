@@ -13,10 +13,13 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+localStorage.setItem("currentUser", username);      // username
+localStorage.setItem("displayName", displayName);   // display name
+
 // === MANUAL ROLE LIST ===
 // Add usernames and their roles here
 const roles = {
-  "muzafar": "admin",
+  "test3": "premium",
   "helperkid": "helper"
   // Add more like: "username": "role"
 };

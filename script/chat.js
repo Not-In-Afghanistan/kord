@@ -1,81 +1,151 @@
+// === Manual Roles Setup ===
+const roles = {
+  "test3": "premium",
+  "helperkid": "helper"
+  // Add more like: "username": "role"
+};
+
+// === Get Current User ===
+const currentUser = localStorage.getItem("currentUser");
+if (!currentUser) window.location.href = "login.html";
+
+// Display name fallback
+const displayName = localStorage.getItem("displayName") || currentUser;
+
+// Role for current user
+const currentRole = roles[currentUser] || "user";
+
 // === Firebase Setup ===
 const db = firebase.database();
 
-// === Get current user ===
-const username = localStorage.getItem("currentUser");
-if (!username) {
-  window.location.href = "login.html";
-}
-
-// === Display Name ===
-db.ref("users/" + username + "/displayName").once("value")
-  .then(snapshot => {
-    const name = snapshot.val() || username;
-    document.getElementById("displayName").textContent = name;
-  })
-  .catch(err => {
-    console.error("Error loading display name:", err);
-    document.getElementById("displayName").textContent = username;
-  });
-
-// === Cuss Word Filter ===
-const badWords = [
-  "fuck", "shit", "bitch", "asshole", "bastard", "dick", "pussy",
-  "cock", "faggot", "slut", "whore", "nigger", "nigga", "cunt", "twat",
-  "retard", "cum", "penis", "vagina", "boob", "sex", "rape"
-];
-function hasBadWord(text) {
-  return badWords.some(w => text.toLowerCase().includes(w));
-}
-
-// === Elements ===
-const serverList = document.getElementById("server-list");
+// === DOM Elements ===
+const main = document.getElementById("main");
+const displayNameEl = document.getElementById("displayName");
 const addServerBtn = document.getElementById("add-server-btn");
 const joinServerBtn = document.getElementById("join-server-btn");
-const main = document.getElementById("main");
-const messagesDiv = document.getElementById("messages");
+const serverModal = document.getElementById("server-modal");
+const joinModal = document.getElementById("join-modal");
+const closeBtns = document.querySelectorAll(".modal .close");
 
-// === Load Servers ===
+// === Banned Words Filter ===
+const bannedWords = [
+  "fuck","shit","bitch","asshole","cunt","nigger","faggot","dick","cock","pussy",
+  "slut","whore","bastard","penis","vagina","sex","rape","cum","boob"
+];
+function hasBadWord(str) {
+  return bannedWords.some(word => str.toLowerCase().includes(word));
+}
+
+// === Display current user's name ===
+if (displayNameEl) displayNameEl.textContent = displayName;
+
+// === Enable/disable Add Server button based on role ===
+if (addServerBtn) {
+  if (currentRole === "premium" || currentRole === "admin") {
+    addServerBtn.disabled = false;
+    addServerBtn.style.opacity = 1;
+    addServerBtn.title = "";
+  } else {
+    addServerBtn.disabled = true;
+    addServerBtn.style.opacity = 0.6;
+    addServerBtn.title = "Premium only: Upgrade to add servers";
+  }
+
+  addServerBtn.onclick = () => {
+    if (currentRole === "premium" || currentRole === "admin") openServerModal();
+  };
+}
+
+// === Join Server button ===
+if (joinServerBtn) joinServerBtn.onclick = () => joinModal.style.display = "block";
+
+// === Close modal buttons ===
+closeBtns.forEach(btn => {
+  btn.onclick = () => btn.closest(".modal").style.display = "none";
+});
+window.onclick = e => {
+  document.querySelectorAll(".modal").forEach(modal => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+};
+
+// === Load servers dynamically ===
 function loadServers() {
-  db.ref("users/" + username + "/servers").on("value", snapshot => {
-    serverList.innerHTML = "";
-    if (!snapshot.exists()) {
+  const serverList = document.getElementById("server-list");
+  serverList.innerHTML = "";
+  db.ref("servers").on("value", snapshot => {
+    const servers = snapshot.val() || {};
+    for (let name in servers) {
       const li = document.createElement("li");
-      li.textContent = "No servers joined yet.";
-      li.classList.add("empty-text");
+      li.textContent = name;
+      li.onclick = () => openServer(name);
       serverList.appendChild(li);
+    }
+  });
+}
+
+// === Load friends dynamically ===
+function loadFriends() {
+  const friendList = document.getElementById("friend-list");
+  friendList.innerHTML = "";
+  db.ref("users").on("value", snapshot => {
+    const users = snapshot.val() || {};
+    for (let username in users) {
+      if (username === currentUser) continue;
+      const li = document.createElement("li");
+      li.textContent = users[username].displayName || username;
+      friendList.appendChild(li);
+    }
+  });
+}
+
+// === Open Server Chat ===
+function openServer(name) {
+  main.innerHTML = `
+    <div class="server-chat">
+      <h2>${name}</h2>
+      <div id="messages" class="messages"></div>
+      <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Type a message...">
+        <button id="sendMsgBtn">Send</button>
+      </div>
+    </div>
+  `;
+
+  const messagesDiv = document.getElementById("messages");
+  const msgInput = document.getElementById("msgInput");
+  const sendBtn = document.getElementById("sendMsgBtn");
+
+  // Live messages
+  db.ref("messages/" + name).on("value", snapshot => {
+    messagesDiv.innerHTML = "";
+    if (!snapshot.exists()) {
+      messagesDiv.innerHTML = `<p class="empty-text">No messages yet. Say hi!</p>`;
       return;
     }
-
-    snapshot.forEach(serverSnap => {
-      const name = serverSnap.key;
-      db.ref("servers/" + name).once("value").then(serverDataSnap => {
-        const data = serverDataSnap.val();
-        if (!data) return;
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${data.img || './images/default-server.png'}" class="server-icon">
-          <span>${name}</span>
-          ${data.owner === username ? `<button class="delete-btn" onclick="deleteServer('${name}')">Delete</button>` : ""}
-        `;
-        li.onclick = () => openServer(name);
-        serverList.appendChild(li);
-      });
+    snapshot.forEach(msgSnap => {
+      const msg = msgSnap.val();
+      const msgEl = document.createElement("div");
+      msgEl.className = "message";
+      msgEl.innerHTML = `<b>${msg.user}:</b> ${msg.text}`;
+      messagesDiv.appendChild(msgEl);
     });
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
+
+  // Send message
+  sendBtn.onclick = () => {
+    const text = msgInput.value.trim();
+    if (!text) return;
+    if (hasBadWord(text)) return alert("Message contains inappropriate language!");
+    db.ref("messages/" + name).push({ user: currentUser, text });
+    msgInput.value = "";
+  };
 }
 
 // === Add Server Modal ===
-const serverModal = document.getElementById("server-modal");
-const joinModal = document.getElementById("join-modal");
-const closeBtns = document.querySelectorAll(".close");
-
-addServerBtn.onclick = () => serverModal.style.display = "block";
-joinServerBtn.onclick = () => joinModal.style.display = "block";
-closeBtns.forEach(btn => btn.onclick = () => {
-  serverModal.style.display = "none";
-  joinModal.style.display = "none";
-});
+function openServerModal() { serverModal.style.display = "block"; }
+function openJoinModal() { joinModal.style.display = "block"; }
 
 // === Create Server ===
 document.getElementById("create-server").onclick = () => {
@@ -90,15 +160,12 @@ document.getElementById("create-server").onclick = () => {
     const imgData = reader.result;
     db.ref("servers/" + name).once("value").then(snap => {
       if (snap.exists()) return alert("Server already exists!");
-      db.ref("servers/" + name).set({
-        owner: username,
-        password,
-        img: imgData
-      }).then(() => {
-        db.ref("users/" + username + "/servers/" + name).set(true);
-        alert("Server created!");
-        serverModal.style.display = "none";
-      });
+      db.ref("servers/" + name).set({ owner: currentUser, password, img: imgData })
+        .then(() => {
+          db.ref("users/" + currentUser + "/servers/" + name).set(true);
+          alert("Server created!");
+          serverModal.style.display = "none";
+        });
     });
   };
   reader.readAsDataURL(file);
@@ -114,7 +181,7 @@ document.getElementById("join-server-confirm").onclick = () => {
     if (!snap.exists()) return alert("Server not found!");
     const data = snap.val();
     if (data.password !== password) return alert("Wrong password!");
-    db.ref("users/" + username + "/servers/" + name).set(true);
+    db.ref("users/" + currentUser + "/servers/" + name).set(true);
     alert("Joined server!");
     joinModal.style.display = "none";
   });
@@ -126,7 +193,7 @@ function deleteServer(name) {
   db.ref("servers/" + name).once("value").then(snap => {
     if (!snap.exists()) return alert("Server not found!");
     const data = snap.val();
-    if (data.owner !== username) return alert("Only the owner can delete!");
+    if (data.owner !== currentUser) return alert("Only the owner can delete!");
     db.ref("servers/" + name).remove().then(() => {
       db.ref("users").once("value").then(usersSnap => {
         usersSnap.forEach(userSnap => {
@@ -138,46 +205,14 @@ function deleteServer(name) {
   });
 }
 
-// === Open Server Chat ===
-function openServer(name) {
-  main.innerHTML = `
-    <div class="chat-header"><h2>${name}</h2></div>
-    <div id="messages"></div>
-    <form id="chat-form">
-      <input type="text" id="chat-input" placeholder="Type a message..." required />
-      <button type="submit">Send</button>
-    </form>
-  `;
-  const messagesDiv = document.getElementById("messages");
-  const chatForm = document.getElementById("chat-form");
-  const chatInput = document.getElementById("chat-input");
-
-  db.ref("messages/" + name).on("value", snapshot => {
-    messagesDiv.innerHTML = "";
-    snapshot.forEach(msgSnap => {
-      const msg = msgSnap.val();
-      const div = document.createElement("div");
-      div.className = "message";
-      div.innerHTML = `<b>${msg.user}:</b> ${msg.text}`;
-      messagesDiv.appendChild(div);
-    });
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
-
-  chatForm.onsubmit = e => {
-    e.preventDefault();
-    const text = chatInput.value.trim();
-    if (!text) return;
-    if (hasBadWord(text)) return alert("Inappropriate language!");
-    db.ref("messages/" + name).push({
-      user: username,
-      text
-    });
-    chatInput.value = "";
-  };
-}
-
-// === Init ===
+// === Init Dashboard ===
 window.onload = () => {
   loadServers();
+  loadFriends();
+  main.innerHTML = `
+    <div class="no-chat">
+      <h2>Welcome to KORD 👋</h2>
+      <p>Join a server or add a friend to start chatting!</p>
+    </div>
+  `;
 };

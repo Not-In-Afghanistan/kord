@@ -78,7 +78,7 @@ body {
   justify-content: space-between;
   padding: 4px;
   border-radius: 5px;
-  background: #2f3136;
+  background: #2b2b2b;
   margin-bottom: 5px;
   cursor: pointer;
   transition: background 0.2s;
@@ -129,7 +129,7 @@ body {
 }
 
 #friend-list li:hover {
-  background: #36393f;
+  background: #2b2b2b;
 }
 
 /* Main chat */
@@ -151,7 +151,7 @@ body {
 #chat-form {
   display: flex;
   padding: 10px 20px;
-  background: #40444b;
+  background: #303030;
 }
 
 #chat-input {
@@ -160,7 +160,7 @@ body {
   border-radius: 5px;
   border: none;
   outline: none;
-  background: #2f3136;
+  background: #303030;
   color: #fff;
 }
 
