@@ -10,19 +10,9 @@ const firebaseConfig = {
   measurementId: "G-T5HK7JTWHW"
 };
 
+// Initialize Firebase only if not already initialized
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
-localStorage.setItem("currentUser", username);      // username
-localStorage.setItem("displayName", displayName);   // display name
-
-// === MANUAL ROLE LIST ===
-// Add usernames and their roles here
-const roles = {
-  "test3": "premium",
-  "helperkid": "helper"
-  // Add more like: "username": "role"
-};
 
 document.getElementById("login").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -35,7 +25,7 @@ document.getElementById("login").addEventListener("submit", async (e) => {
   try {
     const snapshot = await db.ref("users/" + username).get();
 
-    if (!snapshot.exists()) {
+    if (!snapshot.exists() || snapshot.val().password !== password) {
       error.textContent = "Invalid username or password.";
       error.style.display = "block";
       return;
@@ -43,25 +33,13 @@ document.getElementById("login").addEventListener("submit", async (e) => {
 
     const userData = snapshot.val();
 
-    if (userData.password !== password) {
-      error.textContent = "Invalid username or password.";
-      error.style.display = "block";
-      return;
-    }
-
-    // === ROLE LOGIC ===
-    let userRole = "user"; // default role
-    if (roles[username]) {
-      userRole = roles[username];
-    }
-
-    // Store info locally
+    // Store login info
     localStorage.setItem("currentUser", username);
     localStorage.setItem("displayName", userData.displayName);
-    localStorage.setItem("role", userRole);  // NOW SAVING ROLE
 
-    console.log(`Logged in as ${username} with role: ${userRole}`);
+    console.log(`Logged in as ${username}`);
 
+    // Redirect to dashboard
     window.location.href = "./dash.html";
 
   } catch (err) {

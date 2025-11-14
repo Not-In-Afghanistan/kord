@@ -12,31 +12,24 @@
 <!-- Servers sidebar -->
 <div id="servers">
   <h3>Servers</h3>
-  <button id="add-server-btn" class="addServerBtn">Add Server</button>
+  <button id="add-server-btn">Add Server</button>
   <button id="join-server-btn">Join Server</button>
-  <ul id="server-list">
-    <!-- Joined servers appear here s -->
-  </ul>
+  <ul id="server-list"></ul>
 </div>
 
 <!-- Friends sidebar -->
 <div id="friends">
   <h3>Friends</h3>
-  <header>
-    <h3>Welcome, <span id="displayName"></span> !</h3>
-  </header>
-  <ul id="friend-list">
-    <!-- Friend list goes here -->
-  </ul>
+  <button class=".btn">Find Friends</button>
+  <ul id="friend-list"></ul>
 </div>
 
 <!-- Main chat area -->
 <div id="main">
-  <div id="messages"></div>
-  <form id="chat-form">
-    <input type="text" id="chat-input" placeholder="Type a message..." required />
-    <button type="submit">Send</button>
-  </form>
+  <div class="no-chat">
+    <h2>Welcome to KORD 👋</h2>
+    <p>Join a server or add a friend to start chatting!</p>
+  </div>
 </div>
 
 <!-- Add Server Modal -->
@@ -62,6 +55,7 @@
   </div>
 </div>
 
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -75,49 +69,13 @@ const firebaseConfig = {
   projectId: "test-da143",
   storageBucket: "test-da143.appspot.com",
   messagingSenderId: "58366480447",
-  appId: "1:58366480447:web:f3dd12850f09952b49688a",
-  measurementId: "G-T5HK7JTWHW"
+  appId: "1:58366480447:web:f3dd12850f09952b49688a"
 };
 firebase.initializeApp(firebaseConfig);
 </script>
 
-<!-- Dashboard Scripts -->
+<!-- Dashboard JS -->
 <script src="./script/chat.js" defer></script>
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-  const displayNameEl = document.getElementById("displayName");
-  const username = localStorage.getItem("currentUser") || "Guest";
-  const userRole = localStorage.getItem("role") || "user";
-  displayNameEl.textContent = username;
 
-  // Enable/disable Add Server button based on role
-  const addServerBtn = document.getElementById("add-server-btn");
-  if (userRole !== "premium" && userRole !== "admin") {
-    addServerBtn.disabled = true;
-    addServerBtn.title = "Premium only: Upgrade to add servers";
-  } else {
-    addServerBtn.disabled = false;
-    addServerBtn.title = "";
-  }
-
-  addServerBtn.onclick = () => {
-    if (userRole === "premium" || userRole === "admin") {
-      openServerModal();
-    }
-  };
-
-  // Modal close buttons
-  document.querySelectorAll(".modal .close").forEach(btn => {
-    btn.onclick = () => btn.closest(".modal").style.display = "none";
-  });
-
-  // Close modal on click outside
-  window.onclick = e => {
-    document.querySelectorAll(".modal").forEach(modal => {
-      if (e.target === modal) modal.style.display = "none";
-    });
-  };
-});
-</script>
 </body>
 </html>
